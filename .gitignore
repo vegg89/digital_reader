@@ -23,3 +23,4 @@ erl_crash.dump
 digital_reader-*.tar
 
 /.elixir_ls/
+results.txt

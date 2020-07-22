@@ -3,35 +3,71 @@ defmodule DigitalReader do
   Documentation for `DigitalReader`.
   """
 
-  defstruct numbers: "", status: :ok
+  alias DigitalReader.DigitalSequence
 
-  @digital_numbers %{
-    " _ | ||_|" => 0,
-    "     |  |" => 1,
-    " _  _||_ " => 2,
-    " _  _| _|" => 3,
-    "   |_|  |" => 4,
-    " _ |_  _|" => 5,
-    " _ |_ |_|" => 6,
-    " _   |  |" => 7,
-    " _ |_||_|" => 8,
-    " _ |_| _|" => 9
-  }
-
+  defstruct digital_sequences: [],
+            digital_sequence: %DigitalSequence{},
+            h_pointer: 0,
+            v_pointer: 0
 
   @doc """
-  Function that take a file with digital numbers and recognize them.
+  Function that take a file with digital numbers and recognize and validates.
+  The results will be written un results.txt on the root of the proyect
 
   ## Example
 
       iex> DigitalReader.recognize_numbers("file.txt")
-      457508000 OK
-      664371495 ERR
-      86110??36 ILL
-
+      000000000 OK
+      111111111 ERR
+      222222222 ERR
+      Results written in results.txt
   """
-  @spec recognize_numbers(String.t()) :: :ok
+  @spec recognize_numbers(String.t()) :: List.t()
   def recognize_numbers(file_path) do
-    :ok
+    File.rm("results.txt")
+    file_path
+    |> File.stream!([], 1)
+    |> get_characters()
+    |> verify()
+  end
+
+  defp verify(dr = %DigitalReader{}) do
+    dr.digital_sequences
+    |> Enum.reverse()
+    |> Enum.reduce([], fn(ds, ds_acc) ->
+      [DigitalSequence.verify(ds) | ds_acc]
+    end)
+
+    IO.puts "Results written in results.txt"
+  end
+
+  defp get_characters(file_stream) do
+    dr = Enum.reduce(file_stream, %DigitalReader{}, fn letter, reader ->
+      add_character(reader, letter)
+    end)
+
+    %{dr | digital_sequence: nil, digital_sequences: [dr.digital_sequence | dr.digital_sequences]}
+  end
+
+  defp add_character(dr = %DigitalReader{}, "\n") do
+    update_pointer(dr)
+  end
+
+  defp add_character(dr = %DigitalReader{}, letter) do
+    digital_sequence =
+      dr.digital_sequence
+      |> DigitalSequence.add_character(letter)
+
+    %{dr | digital_sequence: digital_sequence}
+  end
+
+  defp update_pointer(dr = %DigitalReader{v_pointer: 3}) do
+    digital_sequences = dr.digital_sequences
+
+    %{dr | digital_sequences: [dr.digital_sequence | digital_sequences], digital_sequence: %DigitalReader.DigitalSequence{}, v_pointer: 0}
+  end
+
+  defp update_pointer(dr = %DigitalReader{}) do
+    %{dr | v_pointer: dr.v_pointer + 1}
   end
 end
