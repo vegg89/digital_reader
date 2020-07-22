@@ -3,7 +3,12 @@ defmodule DigitalReader.DigitalSequence do
   Documentation for `DigitalReader.DigitalNumber`.
   """
 
-  defstruct digital_numbers: %{}, status: :OK, checksum: 0, sequence: [], number_pointer: 0, character_pointer: 0
+  defstruct digital_numbers: %{},
+            status: :OK,
+            checksum: 0,
+            sequence: [],
+            number_pointer: 0,
+            character_pointer: 0
 
   @digital_numbers %{
     " _ | ||_|" => "0",
@@ -30,8 +35,9 @@ defmodule DigitalReader.DigitalSequence do
     |> update_pointer
   end
 
-  def verify(ds = %__MODULE_{}) do
+  def verify(ds = %__MODULE__{}) do
     {:ok, file} = File.open("results.txt", [:write, :append])
+
     ds =
       ds
       |> convert
@@ -43,9 +49,9 @@ defmodule DigitalReader.DigitalSequence do
   end
 
   defp convert(ds) do
-    Enum.reduce(ds.digital_numbers, ds, fn({_, digital_number}, ds_acc) ->
+    Enum.reduce(ds.digital_numbers, ds, fn {_, digital_number}, ds_acc ->
       number = @digital_numbers[digital_number] || "?"
-      status = if number ==  "?" || ds_acc.status == :ILL, do: :ILL, else: :OK
+      status = if number == "?" || ds_acc.status == :ILL, do: :ILL, else: :OK
       sequence = [number | ds_acc.sequence]
 
       %{ds_acc | sequence: sequence, status: status}
@@ -53,15 +59,16 @@ defmodule DigitalReader.DigitalSequence do
   end
 
   defp verify_checksum(ds = %{status: :ILL}), do: %{ds | sequence: Enum.reverse(ds.sequence)}
+
   defp verify_checksum(ds) do
     {_, checksum} =
-      Enum.reduce(ds.sequence, {1, 0}, fn(number, {position, checksum}) ->
-        checksum = checksum + (position * String.to_integer(number))
+      Enum.reduce(ds.sequence, {1, 0}, fn number, {position, checksum} ->
+        checksum = checksum + position * String.to_integer(number)
         {position + 1, checksum}
       end)
 
     checksum = rem(checksum, 11)
-    status = if checksum ==  0, do: :OK, else: :ERR
+    status = if checksum == 0, do: :OK, else: :ERR
 
     %{ds | status: status, checksum: checksum, sequence: Enum.reverse(ds.sequence)}
   end
@@ -69,7 +76,7 @@ defmodule DigitalReader.DigitalSequence do
   defp print_to_file(ds, file) do
     result = "#{ds.sequence} #{ds.status}"
     IO.write(file, "#{result} \n")
-    IO.puts result
+    IO.puts(result)
     result
   end
 

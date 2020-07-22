@@ -25,6 +25,7 @@ defmodule DigitalReader do
   @spec recognize_numbers(String.t()) :: List.t()
   def recognize_numbers(file_path) do
     File.rm("results.txt")
+
     file_path
     |> File.stream!([], 1)
     |> get_characters()
@@ -34,17 +35,18 @@ defmodule DigitalReader do
   defp verify(dr = %DigitalReader{}) do
     dr.digital_sequences
     |> Enum.reverse()
-    |> Enum.reduce([], fn(ds, ds_acc) ->
+    |> Enum.reduce([], fn ds, ds_acc ->
       [DigitalSequence.verify(ds) | ds_acc]
     end)
 
-    IO.puts "Results written in results.txt"
+    IO.puts("Results written in results.txt")
   end
 
   defp get_characters(file_stream) do
-    dr = Enum.reduce(file_stream, %DigitalReader{}, fn letter, reader ->
-      add_character(reader, letter)
-    end)
+    dr =
+      Enum.reduce(file_stream, %DigitalReader{}, fn letter, reader ->
+        add_character(reader, letter)
+      end)
 
     %{dr | digital_sequence: nil, digital_sequences: [dr.digital_sequence | dr.digital_sequences]}
   end
@@ -64,7 +66,12 @@ defmodule DigitalReader do
   defp update_pointer(dr = %DigitalReader{v_pointer: 3}) do
     digital_sequences = dr.digital_sequences
 
-    %{dr | digital_sequences: [dr.digital_sequence | digital_sequences], digital_sequence: %DigitalReader.DigitalSequence{}, v_pointer: 0}
+    %{
+      dr
+      | digital_sequences: [dr.digital_sequence | digital_sequences],
+        digital_sequence: %DigitalReader.DigitalSequence{},
+        v_pointer: 0
+    }
   end
 
   defp update_pointer(dr = %DigitalReader{}) do
