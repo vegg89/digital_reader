@@ -1,21 +1,13 @@
 # DigitalReader
 
-**TODO: Add description**
+**Program to read, recognize and validates digital numbers from a text file**
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `digital_reader` to your list of dependencies in `mix.exs`:
+To use this program:
 
-```elixir
-def deps do
-  [
-    {:digital_reader, "~> 0.1.0"}
-  ]
-end
-```
+  * Install dependencies with `mix deps.get`
+  * Start elixir console with `iex -S mix`
+  * Run the command `DigitalReader.recognize_numbers("test_file.txt")`
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/digital_reader](https://hexdocs.pm/digital_reader).
-
+The results will be written in `results.txt` in the root of the project.
